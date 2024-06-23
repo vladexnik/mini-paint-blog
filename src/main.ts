@@ -4,7 +4,6 @@ import { createPinia } from 'pinia'
 import { createRouterPlugin } from './plugins/router'
 import App from './App.vue'
 import router from './router/index'
-
 import Vue3Toastify, { type ToastContainerOptions } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 

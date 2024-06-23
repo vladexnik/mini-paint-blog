@@ -4,17 +4,50 @@
       <div class="row">
         <label class="title">Shapes</label>
         <ul class="options">
-          <li class="option" id="circle" @click="selectTool('circle')">
+          <li
+            class="option"
+            :class="{ active: selectedTool === 'circle' }"
+            id="circle"
+            @click="selectTool('circle')"
+          >
             <img src="../../icons/circle.svg" alt="circle" />
             <span>Circle</span>
           </li>
-          <li class="option" id="rectangle" @click="selectTool('rectangle')">
+          <li
+            class="option"
+            :class="{ active: selectedTool === 'rectangle' }"
+            id="rectangle"
+            @click="selectTool('rectangle')"
+          >
             <img src="../../icons/rectangle.svg" alt="rectangle" />
             <span>Rectangle</span>
           </li>
-          <li class="option" id="rectangle" @click="selectTool('triangle')">
+          <li
+            class="option"
+            :class="{ active: selectedTool === 'triangle' }"
+            id="rectangle"
+            @click="selectTool('triangle')"
+          >
             <img src="../../icons/triangle.svg" alt="triangle" />
             <span>Triangle</span>
+          </li>
+          <li
+            class="option"
+            :class="{ active: selectedTool === 'star' }"
+            id="star"
+            @click="selectTool('star')"
+          >
+            <img src="../../icons/star.svg" alt="star" />
+            <span>Star</span>
+          </li>
+          <li
+            class="option"
+            :class="{ active: selectedTool === 'line' }"
+            id="line"
+            @click="selectTool('line')"
+          >
+            <img src="../../icons/line.svg" alt="line" />
+            <span>Line</span>
           </li>
           <li class="option">
             <input type="checkbox" id="fill-color" v-model="fillColor" @change="pickColor" />
@@ -25,11 +58,21 @@
       <div class="row">
         <label class="title">Options </label>
         <ul class="options">
-          <li class="option" id="brush" @click="selectTool('brush')">
+          <li
+            class="option"
+            :class="{ active: selectedTool === 'brush' }"
+            id="brush"
+            @click="selectTool('brush')"
+          >
             <img src="../../icons/brush.svg" alt="brush" />
             <span>Brush</span>
           </li>
-          <li class="option" @click="selectTool('eraser')">
+          <li
+            class="option"
+            :class="{ active: selectedTool === 'eraser' }"
+            id="eraser"
+            @click="selectTool('eraser')"
+          >
             <img src="../../icons/eraser.svg" alt="eraser" />
             <span>Eraser</span>
           </li>
@@ -61,6 +104,9 @@
         </li>
         <li class="option">
           <button class="save-img">Save As Image</button>
+        </li>
+        <li class="option">
+          <button class="undo-canvas">Undo</button>
         </li>
       </div>
     </section>
@@ -151,15 +197,31 @@ const drawing = (e: MouseEvent) => {
   const rect = canvas.value!.getBoundingClientRect()
   const currentX = e.clientX - rect.left
   const currentY = e.clientY - rect.top
-  if (selectedTool.value === 'brush' || selectedTool.value === 'eraser') {
-    ctx.value?.lineTo(currentX, currentY)
-    ctx.value?.stroke()
-  } else if (selectedTool.value === 'rectangle') {
-    drawRect(currentX, currentY)
-  } else if (selectedTool.value === 'circle') {
-    drawCircle(currentX, currentY)
-  } else {
-    drawTriangle(currentX, currentY)
+
+  switch (selectedTool.value) {
+    case 'eraser':
+      ctx.value?.lineTo(currentX, currentY)
+      ctx.value?.stroke()
+      break
+    case 'brush':
+      ctx.value?.lineTo(currentX, currentY)
+      ctx.value?.stroke()
+      break
+    case 'rectangle':
+      drawRect(currentX, currentY)
+      break
+    case 'circle':
+      drawCircle(currentX, currentY)
+      break
+    case 'triangle':
+      drawTriangle(currentX, currentY)
+      break
+    case 'line':
+      drawLine(currentX, currentY)
+      break
+    case 'star':
+      drawStar(currentX, currentY)
+      break
   }
 }
 
@@ -171,6 +233,28 @@ const clearCanvas = () => {
   if (!ctx.value || !canvas.value) return
   ctx.value.clearRect(0, 0, canvas.value.width, canvas.value.height)
   setCanvasBackground()
+}
+
+const drawStar = (currentX: number, currentY: number) => {
+  if (!ctx.value) return
+  const points = 7
+  const outerRadius = Math.sqrt(
+    Math.pow(prevMouseX.value - currentX, 2) + Math.pow(prevMouseY.value - currentY, 2)
+  )
+  const innerRadius = outerRadius / 2
+  ctx.value.beginPath()
+  for (let i = 0; i < points; i++) {
+    const angle = (i * 2 * Math.PI) / points - Math.PI / 2
+    const x = prevMouseX.value + Math.cos(angle) * outerRadius
+    const y = prevMouseY.value + Math.sin(angle) * outerRadius
+    ctx.value.lineTo(x, y)
+    const nextAngle = ((i + 0.5) * 2 * Math.PI) / points - Math.PI / 2
+    const innerX = prevMouseX.value + Math.cos(nextAngle) * innerRadius
+    const innerY = prevMouseY.value + Math.sin(nextAngle) * innerRadius
+    ctx.value.lineTo(innerX, innerY)
+  }
+  ctx.value.closePath()
+  fillColor.value ? ctx.value.fill() : ctx.value.stroke()
 }
 
 const drawRect = (currentX: number, currentY: number) => {
@@ -192,13 +276,21 @@ const drawRect = (currentX: number, currentY: number) => {
   }
 }
 
+const drawLine = (currentX: number, currentY: number) => {
+  if (!ctx.value) return
+  ctx.value.beginPath()
+  ctx.value.moveTo(prevMouseX.value, prevMouseY.value)
+  ctx.value.lineTo(currentX, currentY)
+  ctx.value.stroke()
+}
+
 const drawCircle = (currentX: number, currentY: number) => {
   if (!ctx.value) return
   ctx.value.beginPath()
   const radius = Math.sqrt(
     Math.pow(prevMouseX.value - currentX, 2) + Math.pow(prevMouseY.value - currentY, 2)
   )
-  console.log(prevMouseX.value, prevMouseY.value)
+  // console.log(prevMouseX.value, prevMouseY.value)
   ctx.value.arc(prevMouseX.value, prevMouseY.value, radius, 0, 2 * Math.PI)
   fillColor.value ? ctx.value.fill() : ctx.value.stroke()
 }
@@ -255,16 +347,12 @@ section {
   align-items: center;
   margin-bottom: 10px;
 }
-.option:is(:hover, .active) img {
-  filter: invert(17%) sepia(90%) saturate(3000%) hue-rotate(900deg) brightness(100%) contrast(100%);
-}
-.option :where(span, label) {
-  color: #5a6168;
-  cursor: pointer;
-}
+
 .option:is(:hover, .active) :where(span, label) {
   color: #4a98f7;
+  font-weight: 600;
 }
+
 .option #fill-color {
   cursor: pointer;
   height: 14px;
@@ -332,6 +420,11 @@ section {
   border: 1px solid #6c757d;
   transition: all 0.3s ease;
 }
+.buttons .undo-canvas {
+  background-color: #212122;
+  color: #6c757d;
+}
+
 .clear-canvas:hover {
   color: #fff;
   background: #6c757d;
@@ -352,7 +445,7 @@ section {
   border-radius: 20px;
 }
 
-@media (min-width: 350px) and (max-width: 540px) {
+@media (min-width: 300px) and (max-width: 540px) {
   .container {
     display: flex;
     flex-wrap: wrap;
