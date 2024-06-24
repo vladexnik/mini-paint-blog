@@ -100,13 +100,16 @@
 
       <div class="row buttons">
         <li class="option">
+          <button class="undo-canvas" @click="undo">
+            <img src="../../icons/undo.svg" alt="line" />
+            <p>Undo</p>
+          </button>
+        </li>
+        <li class="option">
           <button class="clear-canvas" @click="clearCanvas">Clear All</button>
         </li>
         <li class="option">
           <button class="save-img">Save As Image</button>
-        </li>
-        <li class="option">
-          <button class="undo-canvas">Undo</button>
         </li>
       </div>
     </section>
@@ -137,6 +140,7 @@ const brushWidth = ref(5)
 const selectedColor = ref('#000')
 const fillColor = ref(false)
 const colors = ['#000', 'red', '#0f0', '#00f']
+const history = ref<ImageData[]>([])
 
 const setCanvasBackground = () => {
   if (ctx.value) {
@@ -178,6 +182,25 @@ const selectTool = (tool: string) => {
   selectedTool.value = tool
 }
 
+const saveImageState = () => {
+  if (ctx.value && canvas.value) {
+    snapshot.value = ctx.value.getImageData(0, 0, canvas.value.width, canvas.value.height)
+    history.value.push(snapshot.value)
+  }
+}
+
+const undo = () => {
+  if (history.value.length === 0 || !ctx.value) return
+  console.log('undo')
+  const lastState = history.value[history.value.length - 1]
+  history.value.pop()
+  if (lastState) {
+    ctx.value.putImageData(lastState, 0, 0)
+  } else {
+    clearCanvas()
+  }
+}
+
 const startDraw = (e: MouseEvent) => {
   if (!ctx.value) return
   isDrawing.value = true
@@ -187,7 +210,7 @@ const startDraw = (e: MouseEvent) => {
   ctx.value.lineWidth = brushWidth.value
   ctx.value.strokeStyle = selectedColor.value
   ctx.value.fillStyle = selectedColor.value
-  snapshot.value = ctx.value.getImageData(0, 0, canvas.value!.width, canvas.value!.height)
+  saveImageState()
 }
 
 const drawing = (e: MouseEvent) => {
@@ -231,6 +254,7 @@ const stopDraw = () => {
 
 const clearCanvas = () => {
   if (!ctx.value || !canvas.value) return
+  saveImageState()
   ctx.value.clearRect(0, 0, canvas.value.width, canvas.value.height)
   setCanvasBackground()
 }
@@ -416,13 +440,22 @@ section {
   cursor: pointer;
 }
 .buttons .clear-canvas {
-  color: #6c757d;
+  color: black;
   border: 1px solid #6c757d;
   transition: all 0.3s ease;
 }
 .buttons .undo-canvas {
-  background-color: #212122;
-  color: #6c757d;
+  background-color: #6c757d;
+  color: white;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  border: 1px solid #6c757d;
+}
+.undo-canvas:hover {
+  color: black;
+  background: white;
 }
 
 .clear-canvas:hover {
@@ -431,7 +464,7 @@ section {
 }
 .buttons .save-img {
   background: #4a98f7;
-  border: 1px solid #4a98f7;
+  border: 1px solid #091422;
 }
 
 .canvas {

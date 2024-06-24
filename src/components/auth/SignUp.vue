@@ -6,7 +6,7 @@ import FormAuth from './FormAuth.vue'
   <FormAuth
     title="Sign up to tasker"
     btn="Sign Up"
-    text=" Already have an account?"
+    text="Already have an account?"
     action="Login"
     link="/login"
   />
