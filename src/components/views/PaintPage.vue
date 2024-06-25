@@ -5,7 +5,7 @@
         <label class="title">Shapes</label>
         <ul class="options">
           <li
-            class="option"
+            class="options__option"
             :class="{ active: selectedTool === 'circle' }"
             id="circle"
             @click="selectTool('circle')"
@@ -14,7 +14,7 @@
             <span>Circle</span>
           </li>
           <li
-            class="option"
+            class="options__option"
             :class="{ active: selectedTool === 'rectangle' }"
             id="rectangle"
             @click="selectTool('rectangle')"
@@ -23,7 +23,7 @@
             <span>Rectangle</span>
           </li>
           <li
-            class="option"
+            class="options__option"
             :class="{ active: selectedTool === 'triangle' }"
             id="rectangle"
             @click="selectTool('triangle')"
@@ -32,7 +32,7 @@
             <span>Triangle</span>
           </li>
           <li
-            class="option"
+            class="options__option"
             :class="{ active: selectedTool === 'star' }"
             id="star"
             @click="selectTool('star')"
@@ -41,7 +41,7 @@
             <span>Star</span>
           </li>
           <li
-            class="option"
+            class="options__option"
             :class="{ active: selectedTool === 'line' }"
             id="line"
             @click="selectTool('line')"
@@ -49,66 +49,75 @@
             <img src="../../icons/line.svg" alt="line" />
             <span>Line</span>
           </li>
-          <li class="option">
+          <li class="options__option">
             <input type="checkbox" id="fill-color" v-model="fillColor" @change="pickColor" />
             <label for="fill-color">Fill color</label>
           </li>
         </ul>
       </div>
       <div class="row">
-        <label class="title">Options </label>
-        <ul class="options">
-          <li
-            class="option"
-            :class="{ active: selectedTool === 'brush' }"
-            id="brush"
-            @click="selectTool('brush')"
-          >
-            <img src="../../icons/brush.svg" alt="brush" />
-            <span>Brush</span>
-          </li>
-          <li
-            class="option"
-            :class="{ active: selectedTool === 'eraser' }"
-            id="eraser"
-            @click="selectTool('eraser')"
-          >
-            <img src="../../icons/eraser.svg" alt="eraser" />
-            <span>Eraser</span>
-          </li>
-          <li class="option option-size">
-            <input type="range" id="size-slider" v-model="brushWidth" min="1" max="50" value="5" />
-            <label for="size-slider">Size</label>
-          </li>
-        </ul>
-      </div>
-      <div class="row colors">
-        <label class="title">Colors</label>
-        <ul class="options options-colors">
-          <li
-            class="option"
-            v-for="color in colors"
-            :key="color"
-            :style="{ background: color }"
-            @click="selectColor(color)"
-          ></li>
-          <li class="option">
-            <input type="color" id="color-picker" @change="pickColor" />
-          </li>
-        </ul>
+        <div class="row__inner">
+          <label class="title">Options </label>
+          <ul class="options">
+            <li
+              class="options__option"
+              :class="{ active: selectedTool === 'brush' }"
+              id="brush"
+              @click="selectTool('brush')"
+            >
+              <img src="../../icons/brush.svg" alt="brush" />
+              <span>Brush</span>
+            </li>
+            <li
+              class="options__option"
+              :class="{ active: selectedTool === 'eraser' }"
+              id="eraser"
+              @click="selectTool('eraser')"
+            >
+              <img src="../../icons/eraser.svg" alt="eraser" />
+              <span>Eraser</span>
+            </li>
+            <li class="options__option options__option-size">
+              <input
+                type="range"
+                id="size-slider"
+                v-model="brushWidth"
+                min="1"
+                max="50"
+                value="5"
+              />
+              <label for="size-slider">Size</label>
+            </li>
+          </ul>
+        </div>
+        <div class="row__inner colors">
+          <label class="title">Colors</label>
+          <ul class="options options-colors">
+            <li
+              class="options__option"
+              v-for="color in colors"
+              :key="color"
+              :style="{ background: color }"
+              @click="selectColor(color)"
+            ></li>
+            <li class="options__option">
+              <input type="color" id="color-picker" @change="pickColor" />
+            </li>
+          </ul>
+        </div>
       </div>
 
       <div class="row buttons">
-        <li class="option">
+        <li class="options__option">
           <button class="undo-canvas" @click="undo">
             <img src="../../icons/undo.svg" alt="line" />
             <p>Undo</p>
           </button>
         </li>
-        <li class="option">
+        <li class="options__option">
           <button class="clear-canvas" @click="clearCanvas">Clear All</button>
         </li>
-        <li class="option">
+        <li class="options__option">
           <button class="save-img">Save As Image</button>
         </li>
       </div>
@@ -117,8 +126,6 @@
       class="canvas"
       id="canvas"
       ref="canvas"
-      width="740"
-      height="500"
       @mousedown="startDraw"
       @mousemove="drawing"
       @mouseup="stopDraw"
@@ -131,15 +138,15 @@ import { onMounted, onUnmounted, ref } from 'vue'
 
 const canvas = ref<HTMLCanvasElement | null>(null)
 const ctx = ref<CanvasRenderingContext2D | null>(null)
-const isDrawing = ref(false)
-const prevMouseX = ref(0)
-const prevMouseY = ref(0)
+const isDrawing = ref<boolean>(false)
+const prevMouseX = ref<number>(0)
+const prevMouseY = ref<number>(0)
 const snapshot = ref<ImageData | null>(null)
-const selectedTool = ref('brush')
-const brushWidth = ref(5)
-const selectedColor = ref('#000')
-const fillColor = ref(false)
-const colors = ['#000', 'red', '#0f0', '#00f']
+const selectedTool = ref<string>('brush')
+const brushWidth = ref<number>(5)
+const selectedColor = ref<string>('#000')
+const fillColor = ref<boolean>(false)
+const colors: Array<string> = ['#000', 'red', '#0f0', '#00f']
 const history = ref<ImageData[]>([])
 
 const setCanvasBackground = () => {
@@ -150,6 +157,20 @@ const setCanvasBackground = () => {
   }
 }
 
+const getRelativePosition = (event: MouseEvent): { x: number; y: number } => {
+  const rect = canvas.value!.getBoundingClientRect()
+  const scaleX = canvas.value!.width / rect.width
+  const scaleY = canvas.value!.height / rect.height
+  const x = (event.clientX - rect.left) * scaleX
+  const y = (event.clientY - rect.top) * scaleY
+  // console.log((event.clientX - rect.left) * scaleX, (event.clientY - rect.top) * scaleY)
+  console.log(rect, scaleX, scaleY)
+  return {
+    x,
+    y
+  }
+}
+
 onMounted(() => {
   if (canvas.value) {
     canvas.value.width = canvas.value.offsetWidth
@@ -157,7 +178,6 @@ onMounted(() => {
     ctx.value = canvas.value.getContext('2d')
     setCanvasBackground()
   }
-
   window.addEventListener('mousemove', drawing)
   window.addEventListener('mouseup', stopDraw)
 })
@@ -167,29 +187,29 @@ onUnmounted(() => {
   window.removeEventListener('mouseup', stopDraw)
 })
 
-const selectColor = (color: string) => {
+const selectColor = (color: string): void => {
   console.log(color)
   selectedColor.value = color
 }
 
-const pickColor = (e: Event) => {
+const pickColor = (e: Event): void => {
   const target = e.target as HTMLInputElement
   selectedColor.value = target.value
 }
 
-const selectTool = (tool: string) => {
+const selectTool = (tool: string): void => {
   console.log(tool)
   selectedTool.value = tool
 }
 
-const saveImageState = () => {
+const saveImageState = (): void => {
   if (ctx.value && canvas.value) {
     snapshot.value = ctx.value.getImageData(0, 0, canvas.value.width, canvas.value.height)
     history.value.push(snapshot.value)
   }
 }
 
-const undo = () => {
+const undo = (): void => {
   if (history.value.length === 0 || !ctx.value) return
   console.log('undo')
   const lastState = history.value[history.value.length - 1]
@@ -204,8 +224,9 @@ const undo = () => {
 const startDraw = (e: MouseEvent) => {
   if (!ctx.value) return
   isDrawing.value = true
-  prevMouseX.value = e.offsetX
-  prevMouseY.value = e.offsetY
+  const pos = getRelativePosition(e)
+  prevMouseX.value = pos.x
+  prevMouseY.value = pos.y
   ctx.value.beginPath()
   ctx.value.lineWidth = brushWidth.value
   ctx.value.strokeStyle = selectedColor.value
@@ -213,13 +234,13 @@ const startDraw = (e: MouseEvent) => {
   saveImageState()
 }
 
-const drawing = (e: MouseEvent) => {
+const drawing = (e: MouseEvent): void => {
   if (!isDrawing.value || !ctx.value || !snapshot.value) return
   ctx.value?.putImageData(snapshot.value, 0, 0)
   ctx.value.strokeStyle = selectedTool.value === 'eraser' ? '#fff' : selectedColor.value
-  const rect = canvas.value!.getBoundingClientRect()
-  const currentX = e.clientX - rect.left
-  const currentY = e.clientY - rect.top
+  const pos = getRelativePosition(e)
+  const currentX = pos.x
+  const currentY = pos.y
 
   switch (selectedTool.value) {
     case 'eraser':
@@ -248,11 +269,11 @@ const drawing = (e: MouseEvent) => {
   }
 }
 
-const stopDraw = () => {
+const stopDraw = (): void => {
   isDrawing.value = false
 }
 
-const clearCanvas = () => {
+const clearCanvas = (): void => {
   if (!ctx.value || !canvas.value) return
   saveImageState()
   ctx.value.clearRect(0, 0, canvas.value.width, canvas.value.height)
@@ -337,47 +358,40 @@ const drawTriangle = (currentX: number, currentY: number) => {
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
 }
+
 body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
   background: #4a98f7;
 }
+
 .container {
   display: flex;
-  width: 100%;
-  gap: 10px;
-  max-width: 1050px;
+  flex-wrap: wrap;
+  max-width: 720px;
+  margin: 0 auto;
 }
-section {
-  background: #fff;
-  border-radius: 7px;
-}
+
 .tools-board {
-  width: 150px;
-  margin-right: 30px;
+  user-select: none;
+  margin-left: 20px;
 }
-.tools-board .row {
-  margin-bottom: 20px;
-}
-.row .options {
-  list-style: none;
-  margin: 10px 0 0 5px;
-}
-.row .options .option {
+
+.row .options .options__option {
   display: flex;
   cursor: pointer;
   align-items: center;
   margin-bottom: 10px;
 }
 
-.option:is(:hover, .active) :where(span, label) {
-  color: #4a98f7;
-  font-weight: 600;
+.options {
+  display: flex;
+  gap: 20px;
+  white-space: nowrap;
 }
 
-.option #fill-color {
+.options__option #fill-color {
   cursor: pointer;
   height: 14px;
   width: 14px;
@@ -386,19 +400,40 @@ section {
   color: #4a98f7;
 }
 
-.option #size-slider {
-  width: 80px;
-  height: 5px;
-}
-.option #size-slider:hover {
+.options__option #size-slider:hover {
   cursor: pointer;
+}
+.title {
+  display: none;
 }
 
 .colors .options {
-  display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 15px;
 }
-.colors .option {
+
+.title {
+  display: none;
+}
+.row.buttons {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 20px;
+}
+.buttons button {
+  min-width: 100px;
+}
+.options__option:is(:hover, .active) :where(span, label) {
+  color: #4a98f7;
+  font-weight: 400;
+}
+
+.tools-board .row,
+.row__inner {
+  margin-bottom: 10px;
+}
+
+.colors .options__option {
   height: 20px;
   width: 20px;
   border-radius: 50%;
@@ -406,27 +441,13 @@ section {
   position: relative;
 }
 
-.colors .option.selected::before {
-  position: absolute;
-  content: '';
-  top: 50%;
-  left: 50%;
-  height: 12px;
-  width: 12px;
-  background: inherit;
-  border-radius: inherit;
-  border: 2px solid #fff;
-  transform: translate(-50%, -50%);
-}
-.colors .option:first-child.selected::before {
-  border-color: #ccc;
-}
-.option #color-picker {
+.options__option #color-picker {
   height: 20px;
   width: 20px;
-  background-color: #ffffff;
+  border-radius: 50%;
   cursor: pointer;
 }
+
 .buttons button {
   width: 100%;
   color: #fff;
@@ -449,6 +470,7 @@ section {
   color: white;
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 10px;
   transition: all 0.3s ease;
   border: 1px solid #6c757d;
@@ -462,56 +484,57 @@ section {
   color: #fff;
   background: #6c757d;
 }
+
 .buttons .save-img {
   background: #4a98f7;
-  border: 1px solid #091422;
+  border: 1px solid #4a98f7;
 }
 
 .canvas {
-  max-width: 740px;
-  max-height: 500px;
+  max-width: 720px;
+  aspect-ratio: 8 / 5;
   width: 100%;
+  border: 1px solid #6c757d;
+  border-radius: 20px;
   cursor: pointer;
 }
-.canvas {
-  border: 1px solid grey;
-  border-radius: 20px;
+
+@media (min-width: 550px) and (max-width: 740px) {
+  .tools-board {
+    width: 500px;
+    margin: 0 auto;
+  }
 }
 
-@media (min-width: 300px) and (max-width: 540px) {
-  .container {
-    display: flex;
-    flex-wrap: wrap;
-  }
-  .options {
-    display: flex;
-    gap: 20px;
-    white-space: nowrap;
-  }
-  .options-colors {
-    gap: 0px;
-  }
-  .option :where(span, label) {
+@media (min-width: 300px) and (max-width: 740px) {
+  .options__option :where(span, label) {
     padding-left: 0px;
   }
-  .title {
-    display: none;
-  }
-  .row.buttons {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 20px;
-  }
+
   .buttons button {
     min-width: 100px;
-    padding: 5px 10px;
   }
+
+  #size-slider {
+    width: 100px;
+  }
+  .options__option:is(:hover, .active) :where(span, label) {
+    color: #4a98f7;
+    font-weight: 400;
+  }
+
   .tools-board .row {
     margin-bottom: 10px;
   }
-  .canvas {
-    width: 100%;
-    height: 350px;
+}
+@media (min-width: 350px) and (max-width: 550px) {
+  .options {
+    width: 300px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .tools-board {
+    margin: 0 auto;
   }
 }
 </style>
