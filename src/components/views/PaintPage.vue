@@ -1,4 +1,8 @@
 <template>
+  <button @click="$router.push('/')" type="button" class="back">
+    <img src="../../icons/back.svg" alt="back" />
+    <span>back</span>
+  </button>
   <div class="container">
     <section class="tools-board">
       <div class="row">
@@ -118,7 +122,7 @@
           <button class="clear-canvas" @click="clearCanvas">Clear All</button>
         </li>
         <li class="options__option">
-          <button class="save-img">Save As Image</button>
+          <button class="save-img" @click="saveImage" :disabled="isUploading">Save As Image</button>
         </li>
       </div>
     </section>
@@ -135,6 +139,9 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
+import { storage as storageFirebase, auth } from '../../firebase/config'
+import { getStorage, ref as refFirebase, uploadString } from 'firebase/storage'
+import { toast } from 'vue3-toastify'
 
 const canvas = ref<HTMLCanvasElement | null>(null)
 const ctx = ref<CanvasRenderingContext2D | null>(null)
@@ -148,6 +155,8 @@ const selectedColor = ref<string>('#000')
 const fillColor = ref<boolean>(false)
 const colors: Array<string> = ['#000', 'red', '#0f0', '#00f']
 const history = ref<ImageData[]>([])
+let userEmail = ref<string>('')
+const isUploading = ref<boolean>(false)
 
 const setCanvasBackground = () => {
   if (ctx.value) {
@@ -157,6 +166,37 @@ const setCanvasBackground = () => {
   }
 }
 
+const saveImage = () => {
+  if (!canvas.value) return
+
+  const date: Date = new Date()
+  const timestamp: string = `${date.getTime()}`
+  const storage = getStorage()
+  const storageRef = refFirebase(storage, `images/${userEmail.value}/${timestamp}`)
+  const dataURL = canvas.value.toDataURL('image/png')
+
+  const metadata = {
+    contentType: 'image/png',
+    customMetadata: {
+      userEmail: userEmail.value,
+      date: timestamp
+    }
+  }
+
+  isUploading.value = true
+  uploadString(storageRef, dataURL, 'data_url', metadata)
+    .then(() => {
+      toast.success(`Masterpiece is successfully saved!`)
+    })
+    .catch((error) => {
+      isUploading.value = false
+      toast.error('Error uploading file:', error)
+    })
+    .finally(() => {
+      isUploading.value = false
+    })
+}
+
 const getRelativePosition = (event: MouseEvent): { x: number; y: number } => {
   const rect = canvas.value!.getBoundingClientRect()
   const scaleX = canvas.value!.width / rect.width
@@ -164,7 +204,7 @@ const getRelativePosition = (event: MouseEvent): { x: number; y: number } => {
   const x = (event.clientX - rect.left) * scaleX
   const y = (event.clientY - rect.top) * scaleY
   // console.log((event.clientX - rect.left) * scaleX, (event.clientY - rect.top) * scaleY)
-  console.log(rect, scaleX, scaleY)
+  // console.log(rect, scaleX, scaleY)
   return {
     x,
     y
@@ -172,6 +212,14 @@ const getRelativePosition = (event: MouseEvent): { x: number; y: number } => {
 }
 
 onMounted(() => {
+  auth.onAuthStateChanged((user: any) => {
+    if (user) {
+      userEmail.value = user.email
+      console.log(userEmail.value)
+    }
+  })
+
+  console.log(storageFirebase, auth.currentUser?.email)
   if (canvas.value) {
     canvas.value.width = canvas.value.offsetWidth
     canvas.value.height = canvas.value.offsetHeight
@@ -352,18 +400,11 @@ const drawTriangle = (currentX: number, currentY: number) => {
 </script>
 
 <style scoped>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
-}
-
 body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #4a98f7;
+  background: var(--primary-color);
 }
 
 .container {
@@ -371,6 +412,20 @@ body {
   flex-wrap: wrap;
   max-width: 720px;
   margin: 0 auto;
+  margin-bottom: 30px;
+}
+
+.back {
+  height: 25px;
+  border: none;
+  background-color: transparent;
+  margin-bottom: 20px;
+  margin-right: 20px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--color);
 }
 
 .tools-board {
@@ -397,7 +452,7 @@ body {
   width: 14px;
 }
 #fill-color:checked ~ label {
-  color: #4a98f7;
+  color: var(--primary-color);
 }
 
 .options__option #size-slider:hover {
@@ -424,7 +479,7 @@ body {
   min-width: 100px;
 }
 .options__option:is(:hover, .active) :where(span, label) {
-  color: #4a98f7;
+  color: var(--primary-color);
   font-weight: 400;
 }
 
@@ -450,51 +505,58 @@ body {
 
 .buttons button {
   width: 100%;
-  color: #fff;
+  color: var(--background-color);
   border: none;
   outline: none;
   padding: 11px 0;
-  font-size: 0.9rem;
-  margin-bottom: 13px;
+  margin-bottom: 15px;
   background: none;
   border-radius: 4px;
   cursor: pointer;
 }
 .buttons .clear-canvas {
-  color: black;
-  border: 1px solid #6c757d;
-  transition: all 0.3s ease;
+  color: var(--color);
+  border: 1px solid var(--color-shade);
 }
 .buttons .undo-canvas {
-  background-color: #6c757d;
-  color: white;
+  background-color: var(--color-shade);
+  color: var(--background-color);
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
-  transition: all 0.3s ease;
-  border: 1px solid #6c757d;
+  border: 1px solid var(--color-shade);
 }
+
 .undo-canvas:hover {
-  color: black;
-  background: white;
+  color: var(--color);
+  background: var(--background-color);
 }
 
 .clear-canvas:hover {
-  color: #fff;
-  background: #6c757d;
+  color: var(--background-color);
+  background: var(--color-shade);
 }
 
 .buttons .save-img {
-  background: #4a98f7;
-  border: 1px solid #4a98f7;
+  background-color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+}
+
+.save-img:disabled {
+  background-color: var(--color-shade);
+  border: 1px solid var(--color-shade);
+}
+
+.save-img:hover {
+  background-color: var(--primary-color-shade);
 }
 
 .canvas {
   max-width: 720px;
   aspect-ratio: 8 / 5;
   width: 100%;
-  border: 1px solid #6c757d;
+  border: 1px solid var(--color-shade);
   border-radius: 20px;
   cursor: pointer;
 }
@@ -519,7 +581,7 @@ body {
     width: 100px;
   }
   .options__option:is(:hover, .active) :where(span, label) {
-    color: #4a98f7;
+    color: var(--primary-color);
     font-weight: 400;
   }
 
@@ -527,7 +589,7 @@ body {
     margin-bottom: 10px;
   }
 }
-@media (min-width: 350px) and (max-width: 550px) {
+@media (min-width: 300px) and (max-width: 550px) {
   .options {
     width: 300px;
     flex-wrap: wrap;

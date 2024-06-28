@@ -4,7 +4,7 @@ import FormAuth from './FormAuth.vue'
 
 <template>
   <FormAuth
-    title="Sign up to tasker"
+    title="Sign up to mini-paint"
     btn="Sign Up"
     text="Already have an account?"
     action="Login"

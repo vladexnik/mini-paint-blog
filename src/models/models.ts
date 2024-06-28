@@ -1,3 +1,5 @@
+import { type Ref } from 'vue'
+
 export interface IUser {
   uid: string
   email: string
@@ -9,6 +11,18 @@ export interface IUser {
   lastLoginAt: string
   apiKey: string
   appName: string
+}
+
+export interface IUseLoader {
+  isLoading: Ref<boolean>
+  showLoader: () => void
+  hideLoader: () => void
+}
+
+export type DataObjT = {
+  name: string
+  timestamp: number
+  url: string
 }
 
 export interface IStsTokenManager {

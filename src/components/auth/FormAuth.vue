@@ -13,15 +13,10 @@ const route = useRoute()
 
 defineProps(['title', 'btn', 'text', 'link', 'action'])
 
-// interface LoginData {
-//   email: string
-//   password: string
-// }
-
 const handleSubmitSignUp = async () => {
   try {
     await userStore.signUp(email.value, password.value)
-  } catch (error: any) {
+  } catch (error) {
     console.log(error.code, 'err')
     toast.error('Login error. Reload the page')
   }
@@ -30,7 +25,8 @@ const handleSubmitSignUp = async () => {
 const handleSubmitLogin = async () => {
   try {
     await userStore.login(email.value, password.value)
-  } catch (error: any) {
+    toast.success('Successfully logged in!')
+  } catch (error) {
     console.log(error.code, 'err')
     toast.error('Login error. Reload the page')
   }
@@ -75,9 +71,9 @@ const formAction = () => (route.path === '/login' ? handleSubmitLogin() : handle
   margin: 0 auto;
   margin-top: 70px;
   max-width: 380px;
-  background: var(--white-color);
+  background: var(--color);
   border-radius: 15px;
-  box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 6px 6px 6px var(--color-shade);
 }
 .wrapper .title {
   font-size: 35px;
@@ -87,7 +83,7 @@ const formAction = () => (route.path === '/login' ? handleSubmitLogin() : handle
   color: white;
   user-select: none;
   border-radius: 15px 15px 0 0;
-  background: linear-gradient(-90deg, var(--orange-color), var(--red-color));
+  background: linear-gradient(-90deg, var(--secondary-color), var(--primary-color));
 }
 .wrapper form {
   padding: 10px 30px 50px 30px;
@@ -103,19 +99,18 @@ const formAction = () => (route.path === '/login' ? handleSubmitLogin() : handle
   height: 100%;
   width: 100%;
   outline: none;
-  font-size: 16px;
   padding: 0 15px;
-  border: 1px solid var(--grey-color);
+  border: 1px solid var(--color-shade);
   border-radius: 25px;
   transition: all 0.3s ease;
 }
 .wrapper form .field input:focus,
 form .field input:valid {
-  border-color: grey;
+  border-color: var(--color-shade);
 }
 
 form .content label {
-  color: var(--dark-color);
+  color: var(--color);
   user-select: none;
   padding-left: 5px;
 }
@@ -128,7 +123,7 @@ form .field input[type='submit'] {
   font-size: 20px;
   font-weight: 500;
   cursor: pointer;
-  background: linear-gradient(-90deg, var(--orange-color), var(--red-color));
+  background: linear-gradient(-90deg, var(--secondary-color), var(--primary-color));
   transition: all 0.3s ease;
 }
 form .field input[type='submit']:active {
@@ -140,7 +135,7 @@ form .signup-link {
 }
 form .pass-link a,
 form .signup-link a {
-  color: var(--orange-color);
+  color: var(--primary-color);
   text-decoration: none;
 }
 form .pass-link a:hover,

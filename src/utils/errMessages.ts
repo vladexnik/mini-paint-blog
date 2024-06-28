@@ -19,10 +19,3 @@ export function showErrorMessageSignIn(error: { code: string }): void {
       break
   }
 }
-
-// export function showAddTaskMessage(taskAdd, boolAdded) {
-//   taskAdd.value = boolAdded
-//   setTimeout(() => {
-//     taskAdd.value = null
-//   }, 2000)
-// }
