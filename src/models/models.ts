@@ -25,6 +25,13 @@ export type DataObjT = {
   url: string
 }
 
+export type DataObjT2 = {
+  date: Date
+  src: string
+  timestamp: number
+  userEmail: string
+}
+
 export interface IStsTokenManager {
   refreshToken: string
   accessToken: string

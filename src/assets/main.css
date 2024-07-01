@@ -41,11 +41,12 @@ li {
 }
 
 @media (min-width: 300px) and (max-width: 750px) {
-  html {
-    overflow-y: scroll;
-    font-size: 13px;
-  }
   #app {
     padding: 1rem;
+  }
+}
+@media (max-width: 550px) {
+  html {
+    font-size: 14px;
   }
 }

@@ -1,68 +1,55 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import {
-  getStorage,
-  ref as refFirebase,
-  getDownloadURL,
-  listAll,
-  getMetadata
-} from 'firebase/storage'
 import HeaderPage from './HeaderPage.vue'
 import Loader from '../loader/LoaderComponent.vue'
 import { useLoader } from '../composables/useLoader'
-import type { IUseLoader } from '../../models/models'
-import type { DataObjT } from '../../models/models'
+import type { IUseLoader, DataObjT2 } from '../../models/models'
+import { getDocs, collection, query, orderBy } from 'firebase/firestore'
+import { db } from '../../firebase/config'
 
-const storage = getStorage()
-const data = ref<DataObjT[]>([])
+const data = ref<DataObjT2[]>([])
 let inputString = ref<string>('')
 const { isLoading, showLoader, hideLoader }: IUseLoader = useLoader()
 
-async function listAllFilesAndMetadata(prefix = ''): Promise<void> {
+async function fetchAllData(): Promise<void> {
   showLoader()
   try {
-    const storageRef = refFirebase(storage, prefix)
-    const result = await listAll(storageRef)
-    console.log(result, 'result')
-    for (const itemRef of result.items) {
-      const metadata = await getMetadata(itemRef)
-      const downloadURL = await getDownloadURL(itemRef)
+    const picturesCollectionRef = collection(db, 'pictures')
+    const picturesQuery = query(picturesCollectionRef, orderBy('timestamp', 'desc'))
+    const picturesSnapshot = await getDocs(picturesQuery)
 
-      const objectFile: any = {
-        name: metadata.customMetadata?.userEmail,
-        timestamp: Number(metadata.customMetadata?.date),
-        url: downloadURL
-      }
-      data.value.push(objectFile)
-    }
+    const allData: DataObjT2[] = []
+    picturesSnapshot.forEach((doc) => {
+      allData.push(doc.data() as DataObjT2)
+    })
+    console.log(allData)
 
-    for (const folderRef of result.prefixes) {
-      await listAllFilesAndMetadata(folderRef.fullPath)
-    }
+    data.value = allData
+    console.log(data.value)
   } catch (error) {
-    console.error('Error listing files and metadata:', error)
+    console.error('Error fetching data:', error)
   } finally {
-    data.value = data.value.sort((obj1, obj2) => obj2.timestamp - obj1.timestamp)
     hideLoader()
   }
 }
 
-const filtered = computed(() =>
-  data.value.filter((item: DataObjT) => item.name && item.name.includes(inputString.value))
+const filteredData = computed(() =>
+  data.value.filter((item: any) =>
+    item.userEmail.toLowerCase().includes(inputString.value.toLowerCase())
+  )
 )
 
 onMounted(async () => {
-  await listAllFilesAndMetadata()
-  console.log(filtered.value)
+  await fetchAllData()
 })
 </script>
 
 <template>
-  <div v-if="filtered">
+  <div>
     <div class="container">
       <HeaderPage />
       <div class="main">
-        <h1 class="main__title">Home Page with info how i cool</h1>
+        <h1 class="main__title">Home Page is developing...</h1>
         <input
           type="text"
           class="main__input"
@@ -70,16 +57,17 @@ onMounted(async () => {
           name=""
           placeholder="Enter user's email"
         />
-        <ul class="main__list" v-if="filtered.length > 3">
-          <li class="main__item" v-for="file in filtered" v-bind:key="file.timestamp">
+        <ul class="main__list" v-if="filteredData">
+          <li class="main__item" v-for="file in filteredData" v-bind:key="file.timestamp">
             <div class="main__item-context">
-              <p class="main__item-text user-email"><span>Created by</span> {{ file?.name }}</p>
+              <p class="main__item-text user-email">
+                <span>Created by</span> {{ file?.userEmail }}
+              </p>
               <p class="main__item-text date">
                 <span>Published </span>{{ new Date(file?.timestamp).toString().slice(0, 24) }}
               </p>
             </div>
-            <img class="main__item-img" :src="file.url" alt="" v-if="file.url" />
-            <div v-else>Loading image...</div>
+            <img class="main__item-img" :src="file.src" alt="" v-if="file.src" />
           </li>
         </ul>
         <div>

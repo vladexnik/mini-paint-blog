@@ -1,5 +1,5 @@
 <template>
-  <header class="header" v-if="userEmail">
+  <header class="header">
     <h3 class="header__title">Welcome to mini-paint, {{ userEmail || 'user' }}!</h3>
     <nav class="header__btns">
       <label class="toggle">
@@ -8,12 +8,9 @@
         <span class="toggle-label"></span>
       </label>
       <button class="header__btn" @click="$router.push('/paint')">Go to Paint</button>
-      <button class="header__btn" @click="Logout">{{ userEmail ? 'Logout' : 'Login' }}</button>
+      <button class="header__btn" @click="Logout">{{ 'Logout' }}</button>
     </nav>
   </header>
-  <div>
-    <Loader :isLoading="isLoading" />
-  </div>
 </template>
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
@@ -21,13 +18,11 @@ import { useUserStore } from '../../stores/user'
 import { useRouter } from 'vue-router'
 import { auth } from '../../firebase/config'
 import { useThemeStore } from '../../stores/theme'
-import type { IUseLoader } from '@/models/models'
-import { useLoader } from '../composables/useLoader'
 
-const { isLoading, showLoader, hideLoader }: IUseLoader = useLoader()
 const router = useRouter()
 const userStore = useUserStore()
 const userEmail = ref<string | null>(null)
+const userId = ref<string | null>(null)
 const isChecked = ref<boolean>(false)
 const themeStore = useThemeStore()
 
@@ -44,11 +39,12 @@ watch(
 
 onMounted(() => {
   isChecked.value = themeStore.isDarkTheme
-  showLoader()
+
   auth.onAuthStateChanged((user: any) => {
     if (user) {
-      hideLoader()
       userEmail.value = user?.email
+      userId.value = user?.uid
+      // console.log(userEmail.value, userId.value)
     }
   })
 })
@@ -161,9 +157,8 @@ const Logout = (): void => {
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-  }
-  .header__btn {
-    padding: 5px 10px;
+    gap: 15px;
+    margin-bottom: 20px;
   }
 
   .header__btns {

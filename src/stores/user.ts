@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { auth } from '../firebase/config'
 import {
   createUserWithEmailAndPassword,
+  onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut
   // onAuthStateChanged
@@ -49,6 +50,19 @@ export const useUserStore = defineStore('user', {
       } catch (error) {
         console.error(error)
       }
+    },
+
+    init() {
+      onAuthStateChanged(auth, (currentUser) => {
+        console.log(currentUser)
+        if (currentUser) {
+          this.user = currentUser
+          this.isLoggedIn = true
+        } else {
+          this.user = null
+          this.isLoggedIn = false
+        }
+      })
     }
   }
 })

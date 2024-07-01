@@ -122,7 +122,9 @@
           <button class="clear-canvas" @click="clearCanvas">Clear All</button>
         </li>
         <li class="options__option">
-          <button class="save-img" @click="saveImage" :disabled="isUploading">Save As Image</button>
+          <button class="save-img" @click="handleSaveImage" :disabled="isUploading">
+            Save As Image
+          </button>
         </li>
       </div>
     </section>
@@ -139,9 +141,10 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import { storage as storageFirebase, auth } from '../../firebase/config'
-import { getStorage, ref as refFirebase, uploadString } from 'firebase/storage'
+import { storage as storageFirebase, auth, db } from '../../firebase/config'
+// import { getStorage, ref as refFirebase, uploadString } from 'firebase/storage'
 import { toast } from 'vue3-toastify'
+import { addDoc, collection } from 'firebase/firestore'
 
 const canvas = ref<HTMLCanvasElement | null>(null)
 const ctx = ref<CanvasRenderingContext2D | null>(null)
@@ -157,6 +160,7 @@ const colors: Array<string> = ['#000', 'red', '#0f0', '#00f']
 const history = ref<ImageData[]>([])
 let userEmail = ref<string>('')
 const isUploading = ref<boolean>(false)
+const userId = ref<string | null>(null)
 
 const setCanvasBackground = () => {
   if (ctx.value) {
@@ -166,35 +170,26 @@ const setCanvasBackground = () => {
   }
 }
 
-const saveImage = () => {
-  if (!canvas.value) return
-
-  const date: Date = new Date()
-  const timestamp: string = `${date.getTime()}`
-  const storage = getStorage()
-  const storageRef = refFirebase(storage, `images/${userEmail.value}/${timestamp}`)
-  const dataURL = canvas.value.toDataURL('image/png')
-
-  const metadata = {
-    contentType: 'image/png',
-    customMetadata: {
-      userEmail: userEmail.value,
-      date: timestamp
-    }
+const saveToDB = async (pictureObj: any) => {
+  try {
+    await addDoc(collection(db, 'pictures'), pictureObj)
+    toast.success('Success')
+  } catch (e) {
+    toast.error('Error')
   }
+}
 
-  isUploading.value = true
-  uploadString(storageRef, dataURL, 'data_url', metadata)
-    .then(() => {
-      toast.success(`Masterpiece is successfully saved!`)
-    })
-    .catch((error) => {
-      isUploading.value = false
-      toast.error('Error uploading file:', error)
-    })
-    .finally(() => {
-      isUploading.value = false
-    })
+const handleSaveImage = async () => {
+  if (canvas.value) {
+    const pictureObjActual = {
+      userEmail: userEmail.value,
+      date: new Date(),
+      timestamp: new Date().getTime(),
+      src: canvas.value.toDataURL()
+    }
+    console.log(pictureObjActual)
+    await saveToDB(pictureObjActual)
+  }
 }
 
 const getRelativePosition = (event: MouseEvent): { x: number; y: number } => {
@@ -215,11 +210,10 @@ onMounted(() => {
   auth.onAuthStateChanged((user: any) => {
     if (user) {
       userEmail.value = user.email
-      console.log(userEmail.value)
+      userId.value = user.uid
     }
   })
 
-  console.log(storageFirebase, auth.currentUser?.email)
   if (canvas.value) {
     canvas.value.width = canvas.value.offsetWidth
     canvas.value.height = canvas.value.offsetHeight
