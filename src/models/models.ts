@@ -1,36 +1,28 @@
 import { type Ref } from 'vue'
 
-export interface IUser {
-  uid: string
-  email: string
-  emailVerified: boolean
-  isAnonymous: boolean
-  providerData: IProviderData
-  stsTokenManager: IStsTokenManager
-  createdAt: string
-  lastLoginAt: string
-  apiKey: string
-  appName: string
-}
-
 export interface IUseLoader {
   isLoading: Ref<boolean>
   showLoader: () => void
   hideLoader: () => void
 }
 
-export type DataObjT = {
-  name: string
-  timestamp: number
-  url: string
-}
-
-export type DataObjT2 = {
+export interface IDataObj {
   date: Date
   src: string
   timestamp: number
   userEmail: string
 }
+
+export interface IDataObjWithNullEmail {
+  date: Date
+  src: string
+  timestamp: number
+  userEmail: string | null
+}
+
+// export interface IDataObjNull extends IDataObj {
+//   userEmail: string | null
+// }
 
 export interface IStsTokenManager {
   refreshToken: string

@@ -141,9 +141,10 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import { auth, db } from '../../firebase/config'
-import { toast } from 'vue3-toastify'
-import { addDoc, collection } from 'firebase/firestore'
+import { auth } from '../../firebase/config'
+import type { IDataObj } from '@/models/models'
+import type { User } from 'firebase/auth'
+import { saveToDB } from '@/api/service'
 
 const canvas = ref<HTMLCanvasElement | null>(null)
 const ctx = ref<CanvasRenderingContext2D | null>(null)
@@ -157,7 +158,7 @@ const selectedColor = ref<string>('#000')
 const fillColor = ref<boolean>(false)
 const colors: Array<string> = ['#000', 'red', '#0f0', '#00f']
 const history = ref<ImageData[]>([])
-let userEmail = ref<string>('')
+let userEmail = ref<string | null>('')
 const isUploading = ref<boolean>(false)
 const userId = ref<string | null>(null)
 
@@ -169,24 +170,14 @@ const setCanvasBackground = () => {
   }
 }
 
-const saveToDB = async (pictureObj: any) => {
-  try {
-    await addDoc(collection(db, 'pictures'), pictureObj)
-    toast.success('Success')
-  } catch (e) {
-    toast.error('Error')
-  }
-}
-
 const handleSaveImage = async () => {
   if (canvas.value) {
-    const pictureObjActual = {
-      userEmail: userEmail.value,
+    const pictureObjActual: IDataObj = {
+      userEmail: userEmail.value as string,
       date: new Date(),
       timestamp: new Date().getTime(),
       src: canvas.value.toDataURL()
     }
-    console.log(pictureObjActual)
     await saveToDB(pictureObjActual)
   }
 }
@@ -197,8 +188,6 @@ const getRelativePosition = (event: MouseEvent): { x: number; y: number } => {
   const scaleY = canvas.value!.height / rect.height
   const x = (event.clientX - rect.left) * scaleX
   const y = (event.clientY - rect.top) * scaleY
-  // console.log((event.clientX - rect.left) * scaleX, (event.clientY - rect.top) * scaleY)
-  // console.log(rect, scaleX, scaleY)
   return {
     x,
     y
@@ -206,7 +195,7 @@ const getRelativePosition = (event: MouseEvent): { x: number; y: number } => {
 }
 
 onMounted(() => {
-  auth.onAuthStateChanged((user: any) => {
+  auth.onAuthStateChanged((user: User | null) => {
     if (user) {
       userEmail.value = user.email
       userId.value = user.uid
@@ -376,7 +365,6 @@ const drawCircle = (currentX: number, currentY: number) => {
   const radius = Math.sqrt(
     Math.pow(prevMouseX.value - currentX, 2) + Math.pow(prevMouseY.value - currentY, 2)
   )
-  // console.log(prevMouseX.value, prevMouseY.value)
   ctx.value.arc(prevMouseX.value, prevMouseY.value, radius, 0, 2 * Math.PI)
   fillColor.value ? ctx.value.fill() : ctx.value.stroke()
 }

@@ -15,7 +15,7 @@ app.use(createPinia())
 useUserStore().init()
 app.use(router)
 app.use(Vue3Toastify, {
-  autoClose: 2000,
+  autoClose: 1200,
   position: 'top-right'
 } as ToastContainerOptions)
 app.mount('#app')

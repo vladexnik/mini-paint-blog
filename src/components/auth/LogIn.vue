@@ -1,7 +1,6 @@
 <script setup>
 import FormAuth from './FormAuth.vue'
 </script>
-
 <template>
   <FormAuth
     title="Login to mini-paint"
@@ -11,5 +10,3 @@ import FormAuth from './FormAuth.vue'
     link="/signup"
   />
 </template>
-
-<style scoped></style>

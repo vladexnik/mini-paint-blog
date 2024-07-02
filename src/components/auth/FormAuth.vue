@@ -6,7 +6,6 @@ import { toast } from 'vue3-toastify'
 
 const email = ref('')
 const password = ref('')
-
 const errMsg = ref('')
 const userStore = useUserStore()
 const route = useRoute()
@@ -17,18 +16,15 @@ const handleSubmitSignUp = async () => {
   try {
     await userStore.signUp(email.value, password.value)
   } catch (error) {
-    console.log(error.code, 'err')
-    toast.error('Login error. Reload the page')
+    toast.error('Signup error. Try later, please')
   }
 }
 
 const handleSubmitLogin = async () => {
   try {
     await userStore.login(email.value, password.value)
-    toast.success('Successfully logged in!')
   } catch (error) {
-    console.log(error.code, 'err')
-    toast.error('Login error. Reload the page')
+    toast.error('Login error. Try later, please')
   }
 }
 
@@ -73,14 +69,14 @@ const formAction = () => (route.path === '/login' ? handleSubmitLogin() : handle
   max-width: 380px;
   background: var(--color);
   border-radius: 15px;
-  box-shadow: 6px 6px 6px var(--color-shade);
+  box-shadow: 6px 6px 6px #696767;
 }
 
 .wrapper .title {
-  font-size: 2.4rem;
+  font-size: 2rem;
   font-weight: 600;
   text-align: center;
-  line-height: 100px;
+  padding: 30px;
   color: white;
   user-select: none;
   border-radius: 15px 15px 0 0;

@@ -16,7 +16,6 @@ const router = createRouter({
       path: '/paint',
       name: 'paint',
       component: PaintPage
-      // meta: { requiresAuth: true }
     },
 
     { path: '/login', name: 'LogIn', component: LogIn },

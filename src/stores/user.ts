@@ -46,7 +46,6 @@ export const useUserStore = defineStore('user', {
         await signOut(auth)
         this.user = null
         this.isLoggedIn = false
-        // console.log(this.user, this.isLoggedIn)
       } catch (error) {
         console.error(error)
       }
@@ -54,7 +53,6 @@ export const useUserStore = defineStore('user', {
 
     init() {
       onAuthStateChanged(auth, (currentUser) => {
-        console.log(currentUser)
         if (currentUser) {
           this.user = currentUser
           this.isLoggedIn = true

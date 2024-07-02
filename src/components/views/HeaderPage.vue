@@ -3,9 +3,14 @@
     <h3 class="header__title">Welcome to mini-paint, {{ userEmail || '...' }}!</h3>
     <nav class="header__btns">
       <label class="toggle">
-        <input class="toggle-checkbox" type="checkbox" v-model="isChecked" @change="handleToggle" />
-        <div class="toggle-switch"></div>
-        <span class="toggle-label"></span>
+        <input
+          class="toggle__checkbox"
+          type="checkbox"
+          v-model="isChecked"
+          @change="handleToggle"
+        />
+        <div class="toggle__switch"></div>
+        <span class="toggle__label"></span>
       </label>
       <button class="header__btn" @click="$router.push('/paint')">Go to Paint</button>
       <button class="header__btn" @click="Logout">{{ 'Logout' }}</button>
@@ -18,16 +23,21 @@ import { useUserStore } from '../../stores/user'
 import { useRouter } from 'vue-router'
 import { auth } from '../../firebase/config'
 import { useThemeStore } from '../../stores/theme'
+import type { User } from 'firebase/auth'
 
 const router = useRouter()
 const userStore = useUserStore()
 const userEmail = ref<string | null>(null)
-const userId = ref<string | null>(null)
 const isChecked = ref<boolean>(false)
 const themeStore = useThemeStore()
 
 const handleToggle = () => {
   themeStore.toggleTheme()
+}
+
+const Logout = (): void => {
+  userStore.logout()
+  router.push('/')
 }
 
 watch(
@@ -39,27 +49,29 @@ watch(
 
 onMounted(() => {
   isChecked.value = themeStore.isDarkTheme
-
-  auth.onAuthStateChanged((user: any) => {
+  auth.onAuthStateChanged((user: User | null) => {
     if (user) {
       userEmail.value = user?.email
-      userId.value = user?.uid
-      // console.log(userEmail.value, userId.value)
     }
   })
 })
-
-const Logout = (): void => {
-  userStore.logout()
-  router.push('/')
-}
 </script>
 
 <style>
 .header {
+  background: var(--background-color);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-height: 120px;
+  z-index: 1;
+  box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: space-evenly;
+  margin: 0 auto;
+  padding: 20px;
   gap: 30px;
   align-items: center;
   margin-bottom: 50px;
@@ -96,7 +108,7 @@ const Logout = (): void => {
   display: inline-block;
 }
 
-.toggle-switch {
+.toggle__switch {
   display: inline-block;
   background: var(--color);
   border: 1px solid var(--color);
@@ -107,11 +119,13 @@ const Logout = (): void => {
   vertical-align: middle;
   transition: background 0.25s;
 }
-.toggle-switch:before,
-.toggle-switch:after {
+
+.toggle__switch:before,
+.toggle__switch:after {
   content: '';
 }
-.toggle-switch:before {
+
+.toggle__switch:before {
   display: block;
   background: linear-gradient(
     to bottom,
@@ -126,7 +140,8 @@ const Logout = (): void => {
   left: 4px;
   transition: left 0.25s;
 }
-.toggle:hover .toggle-switch:before {
+
+.toggle:hover .toggle__switch:before {
   background: linear-gradient(
     to bottom,
     var(--background-color) 0%,
@@ -134,19 +149,21 @@ const Logout = (): void => {
   );
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
 }
-.toggle-checkbox:checked + .toggle-switch {
+
+.toggle__checkbox:checked + .toggle__switch {
   background: var(--color);
 }
-.toggle-checkbox:checked + .toggle-switch:before {
+
+.toggle__checkbox:checked + .toggle__switch:before {
   left: 30px;
 }
 
-.toggle-checkbox {
+.toggle__checkbox {
   position: absolute;
   visibility: hidden;
 }
 
-.toggle-label {
+.toggle__label {
   margin-left: 5px;
   position: relative;
   top: 2px;

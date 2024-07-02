@@ -3,45 +3,30 @@ import { computed, onMounted, ref, watch } from 'vue'
 import HeaderPage from './HeaderPage.vue'
 import Loader from '../loader/LoaderComponent.vue'
 import { useLoader } from '../composables/useLoader'
-import type { IUseLoader, DataObjT2 } from '../../models/models'
-import { getDocs, collection, query, orderBy, limit, startAfter } from 'firebase/firestore'
-import { db } from '../../firebase/config'
+import type { IUseLoader, IDataObj } from '../../models/models'
+import type { QueryDocumentSnapshot } from 'firebase/firestore'
+import { fetchDataAll } from '@/api/service'
 
-const data = ref<DataObjT2[]>([])
-const lastVisible = ref<any>(null)
-const inputString = ref('')
+const data = ref<IDataObj[]>([])
+const lastVisible = ref<QueryDocumentSnapshot | null>(null)
+const inputString = ref<string>('')
 
 const { isLoading, showLoader, hideLoader }: IUseLoader = useLoader()
 
-async function fetchAllData(isInitialLoad = true): Promise<void> {
+async function getData(isInitialLoad: boolean = true): Promise<void> {
   showLoader()
   try {
-    const picturesCollectionRef = collection(db, 'pictures')
-    let picturesQuery
-    if (inputString.value.length > 0) {
-      picturesQuery = query(picturesCollectionRef, orderBy('timestamp', 'desc'))
-    } else if (isInitialLoad || !lastVisible.value) {
-      picturesQuery = query(picturesCollectionRef, orderBy('timestamp', 'desc'), limit(10))
-    } else {
-      picturesQuery = query(
-        picturesCollectionRef,
-        orderBy('timestamp', 'desc'),
-        startAfter(lastVisible.value),
-        limit(10)
-      )
-    }
-    const picturesSnapshot = await getDocs(picturesQuery)
-
+    const picturesSnapshot = await fetchDataAll(isInitialLoad, lastVisible, inputString)
     if (picturesSnapshot.docs.length > 0) {
-      window.addEventListener('scroll', handleScroll)
       lastVisible.value = picturesSnapshot.docs[picturesSnapshot.docs.length - 1]
     } else {
       lastVisible.value = null
       window.removeEventListener('scroll', handleScroll)
     }
-    const allData: DataObjT2[] = []
-    picturesSnapshot.forEach((doc) => {
-      allData.push(doc.data() as DataObjT2)
+
+    const allData: IDataObj[] = []
+    picturesSnapshot.forEach((doc: QueryDocumentSnapshot) => {
+      allData.push(doc.data() as IDataObj)
     })
     if (isInitialLoad) {
       data.value = allData
@@ -56,61 +41,58 @@ async function fetchAllData(isInitialLoad = true): Promise<void> {
 }
 
 const filteredData = computed(() =>
-  data.value.filter((item: DataObjT2) =>
+  data.value.filter((item: IDataObj) =>
     item.userEmail.toLowerCase().includes(inputString.value.toLowerCase())
   )
 )
 
 onMounted(async () => {
-  await fetchAllData()
+  await getData(true)
+  window.addEventListener('scroll', handleScroll)
 })
 
 const handleScroll = () => {
-  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
-    fetchAllData(false)
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 250 && !isLoading.value) {
+    getData(false)
   }
 }
 
 watch(inputString, async (newInputString, oldInputString) => {
   if (newInputString !== oldInputString) {
-    lastVisible.value = null
-    data.value = []
-    await fetchAllData(true)
-    window.removeEventListener('scroll', handleScroll)
+    await getData(true)
     if (newInputString === '') {
       window.addEventListener('scroll', handleScroll)
+    } else {
+      window.removeEventListener('scroll', handleScroll)
     }
   }
 })
 </script>
 
 <template>
-  <div>
-    <div class="container">
-      <HeaderPage />
-      <div class="main">
-        <h1 class="main__title">Home Page is developing...</h1>
-        <input
-          type="text"
-          class="main__input"
-          v-model.trim="inputString"
-          placeholder="Enter user's email"
-        />
-        <ul class="main__list" v-if="filteredData">
-          <li class="main__item" v-for="file in filteredData" v-bind:key="file.timestamp">
-            <div class="main__item-context">
-              <p class="main__item-text user-email">
-                <span>Created by</span> {{ file?.userEmail }}
-              </p>
-              <p class="main__item-text date">
-                <span>Published </span>{{ new Date(file?.timestamp).toString().slice(0, 24) }}
-              </p>
-            </div>
-            <img class="main__item-img" :src="file.src" alt="" v-if="file.src" />
-          </li>
-        </ul>
-        <Loader :isLoading="isLoading" />
-      </div>
+  <div class="container">
+    <HeaderPage />
+    <div class="main">
+      <h1 class="main__title">Home Page is developing...</h1>
+      <input
+        type="text"
+        class="main__input"
+        v-model.trim="inputString"
+        placeholder="Enter user's email"
+      />
+      <ul class="main__list" v-if="filteredData">
+        <li class="main__item" v-for="file in filteredData" v-bind:key="file.timestamp">
+          <div class="main__item-context">
+            <p class="main__item-text user-email"><span>Created by</span> {{ file?.userEmail }}</p>
+            <p class="main__item-text date">
+              <span>Published </span>{{ new Date(file?.timestamp).toString().slice(0, 24) }}
+            </p>
+          </div>
+          <img class="main__item-img" :src="file.src" alt="" v-if="file.src" />
+        </li>
+      </ul>
+      <div v-if="filteredData.length === 0">No data for this email. Try something different</div>
+      <Loader :isLoading="isLoading" />
     </div>
   </div>
 </template>
@@ -130,6 +112,7 @@ watch(inputString, async (newInputString, oldInputString) => {
 .main {
   max-width: 750px;
   margin: 0 auto;
+  margin-top: 70px;
   text-align: center;
 }
 
@@ -162,5 +145,10 @@ watch(inputString, async (newInputString, oldInputString) => {
   justify-content: space-between;
   padding: 5px 10px;
   gap: 25px;
+}
+@media (max-width: 620px) {
+  .main {
+    margin-top: 120px;
+  }
 }
 </style>
