@@ -1,6 +1,6 @@
 <template>
   <header class="header">
-    <h3 class="header__title">Welcome to mini-paint, {{ userEmail || 'user' }}!</h3>
+    <h3 class="header__title">Welcome to mini-paint, {{ userEmail || '...' }}!</h3>
     <nav class="header__btns">
       <label class="toggle">
         <input class="toggle-checkbox" type="checkbox" v-model="isChecked" @change="handleToggle" />

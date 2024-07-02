@@ -141,8 +141,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import { storage as storageFirebase, auth, db } from '../../firebase/config'
-// import { getStorage, ref as refFirebase, uploadString } from 'firebase/storage'
+import { auth, db } from '../../firebase/config'
 import { toast } from 'vue3-toastify'
 import { addDoc, collection } from 'firebase/firestore'
 
