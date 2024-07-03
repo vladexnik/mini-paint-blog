@@ -65,7 +65,7 @@ const formAction = () => (route.path === '/login' ? handleSubmitLogin() : handle
 <style scoped>
 .wrapper {
   margin: 0 auto;
-  margin-top: 70px;
+  margin-top: 100px;
   max-width: 380px;
   background: var(--color);
   border-radius: 15px;

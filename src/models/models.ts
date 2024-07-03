@@ -12,29 +12,3 @@ export interface IDataObj {
   timestamp: number
   userEmail: string
 }
-
-export interface IDataObjWithNullEmail {
-  date: Date
-  src: string
-  timestamp: number
-  userEmail: string | null
-}
-
-// export interface IDataObjNull extends IDataObj {
-//   userEmail: string | null
-// }
-
-export interface IStsTokenManager {
-  refreshToken: string
-  accessToken: string
-  expirationTime: number
-}
-
-export interface IProviderData {
-  providerId: string
-  uid: string
-  displayName?: any
-  email: string
-  phoneNumber?: any
-  photoURL?: any
-}

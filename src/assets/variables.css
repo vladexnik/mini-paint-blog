@@ -4,7 +4,7 @@
   --primary-color: rgb(0, 119, 255);
   --primary-color-shade: rgb(100, 168, 245);
   --secondary-color: rgb(255, 57, 229);
-  --background-color: rgb(253, 251, 251);
+  --background-color: rgb(234, 242, 253);
   --color: rgb(45, 45, 45);
   --color-shade: #696767;
   --green-color: rgb(32, 226, 106);
@@ -12,12 +12,6 @@
 }
 
 .dark-theme {
-  --orange-color: #ff9d00;
-  --red-color: rgb(237, 73, 73);
-  --green-color: rgb(32, 226, 106);
-  --primary-color: rgb(0, 119, 255);
-  --primary-color-shade: rgb(100, 168, 245);
-  --secondary-color: rgb(255, 57, 229);
   --background-color: rgb(37, 36, 36);
   --color: rgb(255, 255, 255);
   --color-shade: #f1f1f1;

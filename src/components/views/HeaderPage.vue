@@ -12,7 +12,7 @@
         <div class="toggle__switch"></div>
         <span class="toggle__label"></span>
       </label>
-      <button class="header__btn" @click="$router.push('/paint')">Go to Paint</button>
+      <button class="header__btn paint" @click="$router.push('/paint')">Go to Paint</button>
       <button class="header__btn" @click="Logout">{{ 'Logout' }}</button>
     </nav>
   </header>
@@ -92,6 +92,10 @@ onMounted(() => {
   white-space: nowrap;
 }
 
+.paint {
+  background-color: var(--secondary-color);
+}
+
 .header__btns {
   display: flex;
   align-items: center;
@@ -100,7 +104,7 @@ onMounted(() => {
 
 .header__btn:hover {
   font-size: 18px;
-  background-color: var(--primary-color-shade, 0.5);
+  opacity: 0.7;
 }
 
 .toggle {

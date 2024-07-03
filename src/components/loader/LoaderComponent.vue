@@ -35,7 +35,7 @@ defineProps({
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--white-color);
+  background: var(--background-color);
 }
 @keyframes rotation {
   0% {

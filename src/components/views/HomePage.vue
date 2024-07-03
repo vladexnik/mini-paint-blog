@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import HeaderPage from './HeaderPage.vue'
 import Loader from '../loader/LoaderComponent.vue'
-import { useLoader } from '../composables/useLoader'
+import { useLoader } from '../../composables/useLoader'
 import type { IUseLoader, IDataObj } from '../../models/models'
 import type { QueryDocumentSnapshot } from 'firebase/firestore'
 import { fetchDataAll } from '@/api/service'
@@ -34,7 +34,7 @@ async function getData(isInitialLoad: boolean = true): Promise<void> {
       data.value = [...data.value, ...allData]
     }
   } catch (error) {
-    console.error('Error fetching data:', error)
+    console.error('Error loading data:', error)
   } finally {
     hideLoader()
   }
@@ -73,7 +73,7 @@ watch(inputString, async (newInputString, oldInputString) => {
   <div class="container">
     <HeaderPage />
     <div class="main">
-      <h1 class="main__title">Home Page is developing...</h1>
+      <h1 class="main__title">You can paint too!</h1>
       <input
         type="text"
         class="main__input"
@@ -91,24 +91,15 @@ watch(inputString, async (newInputString, oldInputString) => {
           <img class="main__item-img" :src="file.src" alt="" v-if="file.src" />
         </li>
       </ul>
-      <div v-if="filteredData.length === 0">No data for this email. Try something different</div>
+      <div v-if="filteredData.length === 0 && !isLoading" :isLoading="false">
+        No pictures from this user. Try something different
+      </div>
       <Loader :isLoading="isLoading" />
     </div>
   </div>
 </template>
 
 <style scoped>
-.main__input {
-  border-radius: 25px;
-  padding: 10px;
-  max-width: 520px;
-  width: 100%;
-  margin-top: 20px;
-  background-color: var(--background-color);
-  color: var(--color);
-  border: 1px solid var(--color);
-}
-
 .main {
   max-width: 750px;
   margin: 0 auto;
@@ -118,6 +109,17 @@ watch(inputString, async (newInputString, oldInputString) => {
 
 .main__title {
   color: var(--secondary-color);
+}
+
+.main__input {
+  border-radius: 25px;
+  padding: 10px;
+  max-width: 520px;
+  width: 100%;
+  margin-top: 20px;
+  background-color: var(--background-color);
+  color: var(--color);
+  border: 1px solid var(--color);
 }
 
 .main__list {

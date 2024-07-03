@@ -5,13 +5,13 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut
-  // onAuthStateChanged
 } from 'firebase/auth'
 import router from '../router'
 import { showErrorMessageSignIn } from '../utils/errMessages'
+import type { User } from 'firebase/auth'
 
 export const useUserStore = defineStore('user', {
-  state: (): { user: any; isLoggedIn: boolean } => ({
+  state: (): { user: User | null; isLoggedIn: boolean } => ({
     user: null,
     isLoggedIn: false
   }),
@@ -25,7 +25,7 @@ export const useUserStore = defineStore('user', {
         router.push({ path: '/' })
       } catch (error) {
         showErrorMessageSignIn(error)
-        console.log(error)
+        console.error(error)
       }
     },
 
@@ -37,7 +37,7 @@ export const useUserStore = defineStore('user', {
         router.push({ path: '/' })
       } catch (error) {
         showErrorMessageSignIn(error)
-        console.log(error)
+        console.error(error)
       }
     },
 
@@ -47,6 +47,7 @@ export const useUserStore = defineStore('user', {
         this.user = null
         this.isLoggedIn = false
       } catch (error) {
+        showErrorMessageSignIn(error)
         console.error(error)
       }
     },
