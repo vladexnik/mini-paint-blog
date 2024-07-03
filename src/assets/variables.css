@@ -1,9 +1,18 @@
 :root {
   --orange-color: #ff9d00;
   --red-color: red;
-  --white-color: white;
-  --dark-color: black;
-  --grey-color: #f1f1f1;
+  --primary-color: rgb(0, 119, 255);
+  --primary-color-shade: rgb(100, 168, 245);
+  --secondary-color: rgb(255, 57, 229);
+  --background-color: rgb(234, 242, 253);
+  --color: rgb(45, 45, 45);
+  --color-shade: #696767;
   --green-color: rgb(32, 226, 106);
   --dark-btn-hover: rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme {
+  --background-color: rgb(37, 36, 36);
+  --color: rgb(255, 255, 255);
+  --color-shade: #f1f1f1;
 }
